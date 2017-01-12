@@ -13,13 +13,13 @@ public class MapDBApp extends AbstractAppInvoker {
 
     private static HTreeMap<String, FeedDO> mapDBCache;
 
-//    static {
-//        mapDBCache = DBMaker.hashMapSegmentedMemoryDirect()
-//                .expireMaxSize(SIZE)
-//                .make();
-//    }
+    static {
+        mapDBCache = DBMaker.hashMapSegmentedMemoryDirect()
+                .expireMaxSize(SIZE)
+                .make();
+    }
 
-    //@Test
+    @Test
     @Override
     public void invoke(Object... param) {
 

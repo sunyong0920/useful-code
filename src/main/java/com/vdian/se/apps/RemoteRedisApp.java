@@ -3,6 +3,7 @@ package com.vdian.se.apps;
 import com.vdian.se.domain.FeedDO;
 import com.vdian.se.serialize.Hessian2Serializer;
 import com.vdian.se.serialize.IObjectSerializer;
+import org.junit.Test;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -15,7 +16,7 @@ public class RemoteRedisApp extends AbstractAppInvoker {
 
     private static final IObjectSerializer serializer = new Hessian2Serializer();
 
-    //@Test
+    @Test
     @Override
     public void invoke(Object... param) {
         // write

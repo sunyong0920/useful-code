@@ -13,7 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DirectByteBufferApp extends AbstractAppInvoker {
 
-    //@Test
+    /**
+     * specified vm option: -Xmx512M
+     *
+     * @param param
+     */
+    @Test
     @Override
     public void invoke(Object... param) {
         Map<String, FeedDO> map = createInHeapMap(SIZE);

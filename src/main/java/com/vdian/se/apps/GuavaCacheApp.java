@@ -26,7 +26,7 @@ public class GuavaCacheApp extends AbstractAppInvoker {
     }
 
 
-    //@Test
+    @Test
     @Override
     public void invoke(Object... param) {
         // write
