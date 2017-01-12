@@ -14,6 +14,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * * vm options
+ * -Xmx512M
+ * -XX:MaxDirectMemorySize=512M
+ * -XX:+PrintGC
+ * -XX:+UseConcMarkSweepGC
+ * -XX:+CMSClassUnloadingEnabled
+ * -XX:CMSInitiatingOccupancyFraction=80
+ * -XX:+UseCMSInitiatingOccupancyOnly
+ *
  * @author jifang
  * @since 2017/1/12 上午10:47.
  */
@@ -21,21 +30,6 @@ public class OffHeapStarter {
 
     private static final Map<String, Long> STATISTICS_MAP = new HashMap<>();
 
-    /**
-     * vm options
-     * -Xmx512M
-     * -XX:MaxDirectMemorySize=512M
-     * -XX:+PrintGC
-     * -XX:+UseConcMarkSweepGC
-     * -XX:+CMSClassUnloadingEnabled
-     * -XX:CMSInitiatingOccupancyFraction=80
-     * -XX:+UseCMSInitiatingOccupancyOnly
-     *
-     * @param args
-     * @throws IOException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     */
     public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException {
         Set<Class<?>> classes = PackageScanUtil.scanPackage("com.vdian.se.apps");
         for (Class<?> clazz : classes) {
