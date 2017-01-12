@@ -1,6 +1,7 @@
 package com.vdian.se.apps;
 
 import com.vdian.se.domain.FeedDO;
+import org.junit.Test;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
 
@@ -10,13 +11,13 @@ import org.mapdb.HTreeMap;
  */
 public class MapDBApp extends AbstractAppInvoker {
 
-    private static final HTreeMap<String, FeedDO> mapDBCache;
+    private static HTreeMap<String, FeedDO> mapDBCache;
 
-    static {
-        mapDBCache = DBMaker.hashMapSegmentedMemoryDirect()
-                .expireMaxSize(SIZE)
-                .make();
-    }
+//    static {
+//        mapDBCache = DBMaker.hashMapSegmentedMemoryDirect()
+//                .expireMaxSize(SIZE)
+//                .make();
+//    }
 
     //@Test
     @Override

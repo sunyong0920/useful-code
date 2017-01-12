@@ -16,7 +16,7 @@ public class LocalRedisApp extends AbstractAppInvoker {
 
     private static final IObjectSerializer serializer = new Hessian2Serializer();
 
-    //@Test
+    @Test
     @Override
     public void invoke(Object... param) {
         // write

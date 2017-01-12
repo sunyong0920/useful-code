@@ -14,7 +14,7 @@ public class ConcurrentHashMapApp extends AbstractAppInvoker {
 
     private static final Map<String, FeedDO> cache = new ConcurrentHashMap<>();
 
-    //@Test
+    @Test
     @Override
     public void invoke(Object... param) {
 

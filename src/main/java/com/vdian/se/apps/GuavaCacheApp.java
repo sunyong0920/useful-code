@@ -37,6 +37,7 @@ public class GuavaCacheApp extends AbstractAppInvoker {
             guavaCache.put(key, feedDO);
         }
 
+        System.out.println("write down");
         // read
         for (int i = 0; i < SIZE; ++i) {
             String key = String.format("key_%s", i);

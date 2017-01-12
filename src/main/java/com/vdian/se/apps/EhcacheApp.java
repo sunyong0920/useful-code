@@ -36,7 +36,7 @@ public class EhcacheApp extends AbstractAppInvoker {
 
     }
 
-    //@Test
+    @Test
     @Override
     public void invoke(Object... param) {
         for (int i = 0; i < SIZE; ++i) {

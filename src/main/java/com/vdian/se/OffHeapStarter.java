@@ -17,7 +17,7 @@ import java.util.Set;
  * @author jifang
  * @since 2017/1/12 上午10:47.
  */
-public class OffHeapTester {
+public class OffHeapStarter {
 
     private static final Map<String, Long> STATISTICS_MAP = new HashMap<>();
 
