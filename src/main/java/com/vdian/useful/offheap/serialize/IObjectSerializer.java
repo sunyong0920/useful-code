@@ -1,4 +1,4 @@
-package com.vdian.se.serialize;
+package com.vdian.useful.offheap.serialize;
 
 /**
  * @author zhoupan@weidian.com

@@ -1,4 +1,4 @@
-package com.vdian.se.serialize;
+package com.vdian.useful.offheap.serialize;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;

@@ -1,4 +1,4 @@
-package com.vdian.se.domain;
+package com.vdian.useful.offheap.domain;
 
 import java.io.Serializable;
 

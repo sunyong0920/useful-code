@@ -1,9 +1,9 @@
-package com.vdian.se.apps;
+package com.vdian.useful.offheap.apps;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.vdian.se.domain.FeedDO;
+import com.vdian.useful.offheap.domain.FeedDO;
 import org.junit.Test;
 
 /**

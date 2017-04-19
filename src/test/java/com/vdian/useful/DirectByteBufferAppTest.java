@@ -1,4 +1,4 @@
-package com.vdian.se;
+package com.vdian.useful;
 
 
 import org.junit.Test;

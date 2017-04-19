@@ -1,9 +1,9 @@
-package com.vdian.se.apps;
+package com.vdian.useful.offheap.apps;
 
 import com.google.common.base.Strings;
-import com.vdian.se.domain.FeedDO;
-import com.vdian.se.serialize.Hessian2Serializer;
-import com.vdian.se.serialize.IObjectSerializer;
+import com.vdian.useful.offheap.domain.FeedDO;
+import com.vdian.useful.offheap.serialize.Hessian2Serializer;
+import com.vdian.useful.offheap.serialize.IObjectSerializer;
 import sun.nio.ch.DirectBuffer;
 
 import java.nio.ByteBuffer;

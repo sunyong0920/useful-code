@@ -1,8 +1,8 @@
-package com.vdian.se.apps;
+package com.vdian.useful.offheap.apps;
 
-import com.vdian.se.domain.FeedDO;
-import com.vdian.se.serialize.Hessian2Serializer;
-import com.vdian.se.serialize.IObjectSerializer;
+import com.vdian.useful.offheap.domain.FeedDO;
+import com.vdian.useful.offheap.serialize.Hessian2Serializer;
+import com.vdian.useful.offheap.serialize.IObjectSerializer;
 import org.junit.Test;
 import redis.clients.jedis.Jedis;
 
@@ -10,9 +10,9 @@ import redis.clients.jedis.Jedis;
  * @author jifang
  * @since 2017/1/12 下午3:19.
  */
-public class LocalRedisApp extends AbstractAppInvoker {
+public class RemoteRedisApp extends AbstractAppInvoker {
 
-    private static final Jedis cache = new Jedis("localhost", 6379);
+    private static final Jedis cache = new Jedis("devgroup", 6379);
 
     private static final IObjectSerializer serializer = new Hessian2Serializer();
 
@@ -27,7 +27,7 @@ public class LocalRedisApp extends AbstractAppInvoker {
             byte[] value = serializer.serialize(feedDO);
             cache.set(key.getBytes(), value);
 
-            if (i % 10000 == 0) {
+            if (i % 1000 == 0) {
                 System.out.println("write " + i);
             }
         }
@@ -40,7 +40,7 @@ public class LocalRedisApp extends AbstractAppInvoker {
             FeedDO feedDO = serializer.deserialize(value);
             checkValid(feedDO);
 
-            if (i % 10000 == 0) {
+            if (i % 1000 == 0) {
                 System.out.println("read " + i);
             }
         }

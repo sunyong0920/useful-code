@@ -1,6 +1,6 @@
-package com.vdian.se;
+package com.vdian.useful.offheap;
 
-import com.vdian.se.apps.AbstractAppInvoker;
+import com.vdian.useful.offheap.apps.AbstractAppInvoker;
 
 import java.io.File;
 import java.io.FileFilter;

@@ -1,6 +1,6 @@
-package com.vdian.se.apps;
+package com.vdian.useful.offheap.apps;
 
-import com.vdian.se.domain.FeedDO;
+import com.vdian.useful.offheap.domain.FeedDO;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;

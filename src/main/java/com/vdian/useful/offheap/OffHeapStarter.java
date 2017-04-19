@@ -1,6 +1,6 @@
-package com.vdian.se;
+package com.vdian.useful.offheap;
 
-import com.vdian.se.apps.AbstractAppInvoker;
+import com.vdian.useful.offheap.apps.AbstractAppInvoker;
 import org.apache.commons.proxy.Interceptor;
 import org.apache.commons.proxy.Invocation;
 import org.apache.commons.proxy.ProxyFactory;
@@ -31,7 +31,7 @@ public class OffHeapStarter {
     private static final Map<String, Long> STATISTICS_MAP = new HashMap<>();
 
     public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException {
-        Set<Class<?>> classes = PackageScanUtil.scanPackage("com.vdian.se.apps");
+        Set<Class<?>> classes = PackageScanUtil.scanPackage("com.vdian.useful.offheap.apps");
         for (Class<?> clazz : classes) {
             AbstractAppInvoker invoker = createProxyInvoker(clazz.newInstance());
             invoker.invoke();

@@ -1,4 +1,4 @@
-package com.vdian.se.serialize;
+package com.vdian.useful.offheap.serialize;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

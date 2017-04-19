@@ -1,6 +1,6 @@
-package com.vdian.se.apps;
+package com.vdian.useful.offheap.apps;
 
-import com.vdian.se.domain.FeedDO;
+import com.vdian.useful.offheap.domain.FeedDO;
 import org.ehcache.Cache;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.ResourcePools;
