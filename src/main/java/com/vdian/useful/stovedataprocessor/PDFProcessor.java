@@ -8,6 +8,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import com.vdian.useful.stovedataprocessor.baidu.TransApi;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -18,6 +19,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.*;
 
 /**
@@ -30,6 +32,15 @@ public class PDFProcessor {
 
     private static final Map<String, String> translateMap = ThesaurusProcess.process("/Users/jifang/IdeaProjects/setrain/src/main/resources/thesaurus.txt");
 
+    private static final Map<String, Pair<Integer, Integer>> ghMap = ExcelDataProcessor.processExcel("/Users/jifang/Downloads/已处理对照数据 (1).xlsx",
+            "/Users/jifang/Downloads/jxh1201-1__2016121_2处理.xls");
+
+    private static final NumberFormat formatter = NumberFormat.getNumberInstance();
+
+    static {
+        formatter.setMaximumFractionDigits(2);
+    }
+
     public static void main(String[] args) throws IOException {
         args = new String[]{
                 "/Users/jifang/Downloads/管式炉实验数据GCMS",
@@ -40,9 +51,8 @@ public class PDFProcessor {
 
         File fromParentDir = new File(args[0]);
         File toParentDir = new File(args[1]);
-        if (!toParentDir.exists()) {
-            toParentDir.mkdir();
-        }
+
+        System.out.println(toParentDir.mkdir());
         if (fromParentDir.isDirectory()) {
             File[] files = fromParentDir.listFiles();
             assert files != null;
@@ -96,11 +106,13 @@ public class PDFProcessor {
             }
         }
 
-        List<String> zhNames = getZhName(enNames, translateMap);
-        for (Map.Entry<Integer, Domain> entry : map.entrySet()) {
-            entry.getValue().chName = zhNames.get(entry.getKey() - 1);
-        }
+        /** TODO 填充中文名称**/
+         List<String> zhNames = getZhName(enNames, translateMap);
+         for (Map.Entry<Integer, Domain> entry : map.entrySet()) {
+         entry.getValue().chName = zhNames.get(entry.getKey() - 1);
+         }
 
+         /**/
         writeExcel(map, toFileName);
 
         System.out.println("process file [" + fromAbsoluteFileName + " ] cost: " + (System.currentTimeMillis() - start) + " ms");
@@ -110,12 +122,14 @@ public class PDFProcessor {
 
         try (Workbook workbook = new XSSFWorkbook();
              FileOutputStream out = new FileOutputStream(toFileName)) {
-            Sheet sheet = workbook.createSheet();
-            Row headlineRow = sheet.createRow(0);
-            createTileLine(headlineRow);
+            Sheet sheet0 = workbook.createSheet();
+            createSheet0HeadLine(sheet0);
 
+            SortedMap<Integer, Double> areaRateValueMap = new TreeMap<>();
+
+            double sumOfAreaRate = 0.0;
             for (SortedMap.Entry<Integer, Domain> entry : map.entrySet()) {
-                Row row = sheet.createRow(entry.getKey());
+                Row row = sheet0.createRow(entry.getKey());
 
                 Domain domain = entry.getValue();
                 row.createCell(0, CellType.NUMERIC).setCellValue(domain.number);
@@ -123,23 +137,81 @@ public class PDFProcessor {
                 row.createCell(2, CellType.STRING).setCellValue(domain.enName);
                 row.createCell(3, CellType.STRING).setCellValue(domain.chName);
                 row.createCell(4, CellType.STRING).setCellValue(domain.formula);
+
+                double areaRateValue = Double.valueOf(domain.areaRate);
+                sumOfAreaRate += areaRateValue;
+
+                int cIndex = domain.formula.indexOf("C");
+                int hIndex = domain.formula.indexOf("H");
+                if (cIndex != -1 && hIndex != -1) {
+                    int cCount = Integer.valueOf(domain.formula.substring(cIndex + 1, hIndex));
+                    row.createCell(5, CellType.NUMERIC).setCellValue(cCount);
+
+                    Double subAreaRateSum = areaRateValueMap.get(cCount);
+                    if (subAreaRateSum == null) {
+                        subAreaRateSum = areaRateValue;
+                    } else {
+                        subAreaRateSum += areaRateValue;
+                    }
+                    areaRateValueMap.put(cCount, subAreaRateSum);
+                }
+
+                Pair<Integer, Integer> pair = ghMap.get(domain.enName);
+                if (pair != null) {
+                    row.createCell(6, CellType.NUMERIC).setCellValue(pair.getLeft());
+                    row.createCell(7, CellType.NUMERIC).setCellValue(pair.getRight());
+                }
             }
+
+            Sheet sheet1 = workbook.createSheet();
+            createSheet1HeadLine(sheet1);
+
+            double rateSum = 0.0;
+            int rowNumber = 1;
+            for (Map.Entry<Integer, Double> entry : areaRateValueMap.entrySet()) {
+                Row row = sheet1.createRow(rowNumber++);
+
+                row.createCell(0, CellType.NUMERIC).setCellValue(entry.getKey());
+                double rate = Double.valueOf(formatter.format(entry.getValue() * 100.0 / sumOfAreaRate));
+                row.createCell(1, CellType.NUMERIC).setCellValue(rate);
+                rateSum += rate;
+            }
+            Row afterRow = sheet1.createRow(rowNumber);
+            afterRow.createCell(0, CellType.STRING).setCellValue("合计");
+            afterRow.createCell(1, CellType.NUMERIC).setCellValue(formatter.format(rateSum));
+
 
             workbook.write(out);
         }
     }
 
-    private static void createTileLine(Row row) {
-        String[] titles = new String[]{
+    private static void createSheet0HeadLine(Sheet sheet) {
+        String[] sheet0Titles = new String[]{
                 "编号",
                 "峰面积%",
                 "英文名称",
                 "中文名称",
                 "分子式",
+                "碳分子数",
+                "1杂环化合物/2芳香烃/3脂肪烃/4其他",
+                "芳香环数量",
                 "备注"
         };
+        createHeadLine(sheet0Titles, sheet);
+    }
+
+    private static void createSheet1HeadLine(Sheet sheet) {
+        String[] sheet1titles = new String[]{
+                "碳原子数",
+                "百分比"
+        };
+        createHeadLine(sheet1titles, sheet);
+    }
+
+    private static void createHeadLine(String[] titles, Sheet sheet) {
+        Row headLine = sheet.createRow(0);
         for (int i = 0; i < titles.length; ++i) {
-            row.createCell(i, CellType.STRING).setCellValue(titles[i]);
+            headLine.createCell(i, CellType.STRING).setCellValue(titles[i]);
         }
     }
 
