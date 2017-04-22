@@ -15,14 +15,21 @@ import java.util.Map;
  */
 public class ExcelDataProcessor {
 
-    public static Map<String, Pair<Integer, Integer>> processExcel(String... fileNames) {
+    public static Map<String, Pair<Integer, Integer>> processExcel(String fileName) {
 
         Map<String, Pair<Integer, Integer>> result = new HashMap<>();
 
-        for (String fileName : fileNames) {
+        File dirFile = new File(fileName);
+        for (File file : dirFile.listFiles()) {
+            if (file.getName().equals(".")
+                    || file.getName().equals("..")
+                    || file.getName().startsWith(".")) {
+                continue;
+            }
+
             Workbook workbook;
             try {
-                workbook = WorkbookFactory.create(new File(fileName));
+                workbook = WorkbookFactory.create(file);
             } catch (IOException | InvalidFormatException e) {
                 throw new RuntimeException(e);
             }

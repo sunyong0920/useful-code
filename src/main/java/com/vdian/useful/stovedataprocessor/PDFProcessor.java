@@ -7,7 +7,8 @@ import com.google.common.base.Strings;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfTextExtractor;
 import com.vdian.useful.stovedataprocessor.baidu.TransApi;
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -28,12 +29,12 @@ import java.util.*;
  */
 public class PDFProcessor {
 
+
     private static final TransApi api = new TransApi("20170317000042491", "wFBf3mWy5ZPwsCFx72lb");
 
     private static final Map<String, String> translateMap = ThesaurusProcess.process("/Users/jifang/IdeaProjects/setrain/src/main/resources/thesaurus.txt");
 
-    private static final Map<String, Pair<Integer, Integer>> ghMap = ExcelDataProcessor.processExcel("/Users/jifang/Downloads/已处理对照数据 (1).xlsx",
-            "/Users/jifang/Downloads/jxh1201-1__2016121_2处理.xls");
+    private static final Map<String, Pair<Integer, Integer>> ghMap = ExcelDataProcessor.processExcel("/Users/jifang/Downloads/对照组");
 
     private static final NumberFormat formatter = NumberFormat.getNumberInstance();
 
@@ -89,24 +90,32 @@ public class PDFProcessor {
         long start = System.currentTimeMillis();
         PdfReader reader = new PdfReader(fromAbsoluteFileName);
 
+        if (fromAbsoluteFileName.contains("jxh-3__20161215_3")) {
+            System.out.println(fromAbsoluteFileName);
+        }
+
+        // 一次性将pdf全部读完
+        StringBuilder sb = new StringBuilder();
+        for (int pageNumber = 1; pageNumber <= reader.getNumberOfPages(); ++pageNumber) {
+            sb.append(PdfTextExtractor.getTextFromPage(reader, pageNumber)).append("\n");
+        }
+
+
         SortedMap<Integer, Domain> map = new TreeMap<>();
         List<String> enNames = new ArrayList<>();
-        for (int pageNumber = 1; pageNumber <= reader.getNumberOfPages(); ++pageNumber) {
+        for (Iterator<String> iterator = Splitter.on("\n").omitEmptyStrings().split(sb.toString()).iterator();
+             iterator.hasNext(); ) {
 
-            // 一页
-            Iterator<String> iterator = Splitter.on("\n").split(PdfTextExtractor.getTextFromPage(reader, pageNumber)).iterator();
-            while (iterator.hasNext()) {
-                String line = iterator.next();
-                if (line.startsWith(" 峰号")) {
-                    processMap(map, enNames, iterator);
-                } else if (line.startsWith("行号#:")) {
-                    int number = Integer.valueOf(line.split("   ")[0].split(":")[1]);
-                    map.get(number).formula = getFormula(iterator);
-                }
+            String line = iterator.next();
+            if (line.startsWith(" 峰号")) {
+                processMap(map, enNames, iterator);
+            } else if (line.startsWith("行号#:")) {
+                int number = Integer.valueOf(line.split("   ")[0].split(":")[1]);
+                map.get(number).formula = getFormula(iterator);
             }
         }
 
-        /** TODO 填充中文名称**/
+        /** TODO 填充中文名称*/
          List<String> zhNames = getZhName(enNames, translateMap);
          for (Map.Entry<Integer, Domain> entry : map.entrySet()) {
          entry.getValue().chName = zhNames.get(entry.getKey() - 1);
@@ -141,20 +150,17 @@ public class PDFProcessor {
                 double areaRateValue = Double.valueOf(domain.areaRate);
                 sumOfAreaRate += areaRateValue;
 
-                int cIndex = domain.formula.indexOf("C");
-                int hIndex = domain.formula.indexOf("H");
-                if (cIndex != -1 && hIndex != -1) {
-                    int cCount = Integer.valueOf(domain.formula.substring(cIndex + 1, hIndex));
-                    row.createCell(5, CellType.NUMERIC).setCellValue(cCount);
+                // 取碳分子数
+                int carbonCount = getCarbonCount(domain.formula);
+                row.createCell(5, CellType.NUMERIC).setCellValue(carbonCount);
 
-                    Double subAreaRateSum = areaRateValueMap.get(cCount);
-                    if (subAreaRateSum == null) {
-                        subAreaRateSum = areaRateValue;
-                    } else {
-                        subAreaRateSum += areaRateValue;
-                    }
-                    areaRateValueMap.put(cCount, subAreaRateSum);
+                Double subAreaRateSum = areaRateValueMap.get(carbonCount);
+                if (subAreaRateSum == null) {
+                    subAreaRateSum = areaRateValue;
+                } else {
+                    subAreaRateSum += areaRateValue;
                 }
+                areaRateValueMap.put(carbonCount, subAreaRateSum);
 
                 Pair<Integer, Integer> pair = ghMap.get(domain.enName);
                 if (pair != null) {
@@ -183,6 +189,25 @@ public class PDFProcessor {
 
             workbook.write(out);
         }
+    }
+
+    private static int getCarbonCount(String formula) {
+        int carbonCount = 0;
+        int cIndex = formula.indexOf("C");
+        if (cIndex != -1) {
+            StringBuilder countStr = new StringBuilder();
+            for (int i = cIndex + 1; i < formula.length(); ++i) {
+                if (NumberUtils.isDigits(new String(new char[]{formula.charAt(i)}))) {
+                    countStr.append(formula.charAt(i));
+                } else {
+                    break;
+                }
+            }
+
+            carbonCount = Integer.valueOf(countStr.toString());
+        }
+
+        return carbonCount;
     }
 
     private static void createSheet0HeadLine(Sheet sheet) {
@@ -268,6 +293,10 @@ public class PDFProcessor {
             String line = iter.next();
             List<String> word = Splitter.on("  ").omitEmptyStrings().trimResults().splitToList(line);
             if (word.size() == 10 || word.size() == 11) {
+                if (!StringUtils.isNumeric(word.get(0))) {
+                    continue;
+                }
+
                 int number = Integer.valueOf(word.get(0));
                 String areaRate = word.get(5);
                 String enName;
